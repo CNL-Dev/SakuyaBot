@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using SakuyaBot;
 using System.Xml;
 
 public class Program
@@ -9,8 +10,7 @@ public class Program
 
     public static Task Main(string[] args) => new Program().MainAsync();
 
-
-    //TODO: Fix this, none of it works!
+    //Obtains the APi token from a file and connects to a discord client
     public async Task MainAsync()
     {
         _client = new DiscordSocketClient();
