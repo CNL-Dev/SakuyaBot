@@ -10,7 +10,7 @@ public class Program
 
     public static Task Main(string[] args) => new Program().MainAsync();
 
-    //Obtains the APi token from a file and connects to a discord client
+    //Obtains the API token from a file and connects to a discord client
     public async Task MainAsync()
     {
         _client = new DiscordSocketClient();
@@ -23,7 +23,25 @@ public class Program
         await _client.LoginAsync(TokenType.Bot, token[0].InnerText);
         await _client.StartAsync();
 
+        _client.Ready += () =>
+        {
+            Console.WriteLine("SakuyaBOT is connected!");
+            return Task.CompletedTask;
+        };
+
+        _client.MessageReceived += Client_OnMessageReceived;
+
         await Task.Delay(-1);
+    }
+
+    private Task Client_OnMessageReceived(SocketMessage arg)
+    {
+        if (arg.Content.StartsWith("!helloworld"))
+        {
+            arg.Channel.SendMessageAsync($"User '{arg.Author.Username}' successfully ran helloworld!");
+        }
+
+        return Task.CompletedTask;
     }
 
     private Task Log(LogMessage msg)
