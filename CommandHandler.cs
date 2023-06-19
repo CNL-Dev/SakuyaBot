@@ -11,20 +11,20 @@ namespace SakuyaBot
 {
     public class CommandHandler
     {
-        private readonly DiscordSocketClient _client;
-        private readonly CommandService _commands;
+        private readonly DiscordSocketClient client;
+        private readonly CommandService commands;
 
         // Retrieve client and CommandService instance via ctor
         public CommandHandler(DiscordSocketClient client, CommandService commands)
         {
-            _commands = commands;
-            _client = client;
+            this.commands = commands;
+            this.client = client;
         }
 
         public async Task InstallCommandsAsync()
         {
             // Hook the MessageReceived event into our command handler
-            _client.MessageReceived += HandleCommandAsync;
+            client.MessageReceived += HandleCommandAsync;
 
             // Here we discover all of the command modules in the entry 
             // assembly and load them. Starting from Discord.NET 2.0, a
@@ -34,7 +34,7 @@ namespace SakuyaBot
             //
             // If you do not use Dependency Injection, pass null.
             // See Dependency Injection guide for more information.
-            await _commands.AddModulesAsync(assembly: Assembly.GetEntryAssembly(),
+            await commands.AddModulesAsync(assembly: Assembly.GetEntryAssembly(),
                                             services: null);
         }
 
@@ -49,16 +49,16 @@ namespace SakuyaBot
 
             // Determine if the message is a command based on the prefix and make sure no bots trigger commands
             if (!(message.HasCharPrefix('!', ref argPos) ||
-                message.HasMentionPrefix(_client.CurrentUser, ref argPos)) ||
+                message.HasMentionPrefix(client.CurrentUser, ref argPos)) ||
                 message.Author.IsBot)
                 return;
 
             // Create a WebSocket-based command context based on the message
-            var context = new SocketCommandContext(_client, message);
+            var context = new SocketCommandContext(client, message);
 
             // Execute the command with the command context we just
             // created, along with the service provider for precondition checks.
-            await _commands.ExecuteAsync(
+            await commands.ExecuteAsync(
                 context: context,
                 argPos: argPos,
                 services: null);

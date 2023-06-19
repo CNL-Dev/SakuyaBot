@@ -1,11 +1,12 @@
 ﻿using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using SakuyaBot;
 using System.Xml;
 
 public class Program
 {
-    private DiscordSocketClient _client;
+    private DiscordSocketClient client;
     private readonly string xmlFilePath = @"Resources\token.xml";
 
     public static Task Main(string[] args) => new Program().MainAsync();
@@ -13,23 +14,26 @@ public class Program
     //Obtains the API token from a file and connects to a discord client
     public async Task MainAsync()
     {
-        _client = new DiscordSocketClient();
-        _client.Log += Log;
+        client = new DiscordSocketClient();
+        CommandService commandService = new CommandService();
+        LoggingService logging = new LoggingService(client, commandService);
 
         XmlDocument xmlDocument = new XmlDocument();
         xmlDocument.Load(xmlFilePath);
         XmlNodeList token = xmlDocument.GetElementsByTagName("token");
 
-        await _client.LoginAsync(TokenType.Bot, token[0].InnerText);
-        await _client.StartAsync();
+        CommandHandler commandHandler = new CommandHandler(client, commandService);
 
-        _client.Ready += () =>
+        await client.LoginAsync(TokenType.Bot, token[0].InnerText);
+        await client.StartAsync();
+
+        client.Ready += () =>
         {
             Console.WriteLine("SakuyaBOT is connected!");
             return Task.CompletedTask;
         };
 
-        _client.MessageReceived += Client_OnMessageReceived;
+        await commandHandler.InstallCommandsAsync();
 
         await Task.Delay(-1);
     }
@@ -41,12 +45,6 @@ public class Program
             arg.Channel.SendMessageAsync($"User '{arg.Author.Username}' successfully ran helloworld!");
         }
 
-        return Task.CompletedTask;
-    }
-
-    private Task Log(LogMessage msg)
-    {
-        Console.WriteLine(msg.ToString());
         return Task.CompletedTask;
     }
 }
